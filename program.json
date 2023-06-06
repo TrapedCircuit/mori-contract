@@ -1,0 +1,10 @@
+{
+    "program": "flipflap.aleo",
+    "version": "0.0.0",
+    "description": "",
+    "development": {
+        "private_key": "APrivateKey1zkp9ci6a6jAYqrBzAowqkiAWjyGGxYf1zWm5v5qQdWgNmLr",
+        "address": "aleo16g0j49ys47rckm672gerzu5pt065zlk0k6ae780keflhlzmusqpqhyza93"
+    },
+    "license": "MIT"
+}
