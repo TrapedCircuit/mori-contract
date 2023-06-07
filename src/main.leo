@@ -30,11 +30,11 @@ program mori.aleo {
         return aleo1gq3kd85wran4xhfh7hvnxkgee9wxq0vpg7r43tf6t3cafhqnkqrs76ssf0; // need to change to your own address
     }
 
-    transition move_to_next (node_id: field, new_state: u128, valid_pos: u32, game_status: u8) {
-        return then finalize(node_id, new_state, valid_pos, game_status);
+    transition move_to_next (node_id: field, next_node_id: field, new_state: u128, valid_pos: u32, game_status: u8) {
+        return then finalize(node_id, next_node_id, new_state, valid_pos, game_status);
     }
 
-    finalize move_to_next (node_id: field, new_state: u128, valid_pos: u32, game_status: u8) {
+    finalize move_to_next (node_id: field, next_node_id: field, new_state: u128, valid_pos: u32, game_status: u8) {
         // check if is owner
         assert_eq(self.caller, get_contract_onwer());
 
@@ -65,7 +65,7 @@ program mori.aleo {
 
         // create new node
         let son: Node = Node {
-            node_id: BHP512::hash(node_id),
+            node_id: next_node_id,
             state: new_state,
             parent_id: node_id,
             node_type: 2u8, // to leaf node
