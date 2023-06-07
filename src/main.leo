@@ -1,5 +1,5 @@
 // The 'flipflap' program.
-program flipflap.aleo {
+program mori.aleo {
     mapping is_voted: Voted => bool;
     mapping nodes: field => Node;
     mapping node_exist: field => bool;
@@ -14,8 +14,8 @@ program flipflap.aleo {
     }
 
     struct Voted {
-        voter: address,
-        node_id: field,
+        key1: field,
+        key2: field,
     }
 
     struct Node {
@@ -27,7 +27,7 @@ program flipflap.aleo {
     }
 
     inline get_contract_onwer () -> address {
-        return aleo1gq3kd85wran4xhfh7hvnxkgee9wxq0vpg7r43tf6t3cafhqnkqrs76ssf0;
+        return aleo1gq3kd85wran4xhfh7hvnxkgee9wxq0vpg7r43tf6t3cafhqnkqrs76ssf0; // need to change to your own address
     }
 
     transition move_to_next (node_id: field, new_state: u128, valid_pos: u32, game_status: u8) {
@@ -49,13 +49,16 @@ program flipflap.aleo {
         assert(is_enough);
 
         let parent: Node = Mapping::get(nodes, node_id);
-
-        // update node
+        let parent_node_type: u8 = 1u8;
+        if parent.node_type == 0u8 {
+            parent_node_type = 0u8;
+        }
+        // update old node
         let new_parent: Node = Node {
             node_id: parent.node_id,
             state: parent.state,
             parent_id: parent.parent_id,
-            node_type: 1u8, // to simple node
+            node_type: parent_node_type, // to internal node or stay root node
             game_status: game_status,
         };
         Mapping::set(nodes, node_id, new_parent);
@@ -103,18 +106,21 @@ program flipflap.aleo {
             node_id: node_id,
             mov: mov,
         };
-        return caller_vote then finalize(node_id, mov);
+        let voted_key1: field = BHP512::hash(self.caller);
+        let voted_key2: field = BHP512::hash(node_id);
+
+        return caller_vote then finalize(node_id, mov, voted_key1, voted_key2);
     }
 
-    finalize vote (node_id: field, mov: u8) {
+    finalize vote (node_id: field, mov: u8, voted_key1: field, voted_key2: field) {
         // check if is exist
         let is_exist: bool = Mapping::get_or_init(node_exist, node_id, false);
         assert_eq(is_exist, true);
 
         // check if is voted
         let voted: Voted = Voted {
-            voter: self.caller,
-            node_id: node_id,
+            key1: voted_key1,
+            key2: voted_key2,
         };
         let is_vote: bool = Mapping::get_or_init(is_voted, voted, false);
         assert_eq(is_vote, false);
