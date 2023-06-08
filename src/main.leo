@@ -27,7 +27,7 @@ program mori.aleo {
     }
 
     inline get_contract_onwer () -> address {
-        return aleo1gq3kd85wran4xhfh7hvnxkgee9wxq0vpg7r43tf6t3cafhqnkqrs76ssf0; // need to change to your own address
+        return aleo1rhgdu77hgyqd3xjj8ucu3jj9r2krwz6mnzyd80gncr5fxcwlh5rsvzp9px; // need to change to your own address
     }
 
     transition move_to_next (node_id: field, next_node_id: field, new_state: u128, valid_pos: u32, game_status: u8) {
@@ -76,13 +76,12 @@ program mori.aleo {
     }
 
     transition open_game (start_id: field) {
+        // check if is owner
+        assert_eq(self.caller, get_contract_onwer());
         return then finalize(start_id);
     }
 
     finalize open_game (start_id: field) {
-        // check if is owner
-        assert_eq(self.caller, get_contract_onwer());
-
         // check if is exist
         let is_exist: bool = Mapping::get_or_init(node_exist, start_id, false);
         assert_eq(is_exist, false);

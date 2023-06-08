@@ -1,4 +1,7 @@
 // The program input for flipflap/src/main.leo
-[main]
-public a: u32 = 1u32;
-b: u32 = 2u32;
+[vote]
+node_id: field = 25939613864655546608765990709996941590field;
+mov: u8 = 11u8;
+
+[open_game]
+node_id: field = 25939613864655546608765990709996941590field;
