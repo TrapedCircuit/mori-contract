@@ -94,7 +94,9 @@ program mori.aleo {
             node_type: 0u8,
             game_status: 0u8,
         };
+
         Mapping::set(nodes, start_id, node);
+        Mapping::set(node_exist, start_id, true);
     }
 
     // Client Operations
