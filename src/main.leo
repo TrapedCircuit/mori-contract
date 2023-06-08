@@ -31,13 +31,12 @@ program mori.aleo {
     }
 
     transition move_to_next (node_id: field, next_node_id: field, new_state: u128, valid_pos: u32, game_status: u8) {
+        // check if is owner
+        assert_eq(self.caller, get_contract_onwer());
         return then finalize(node_id, next_node_id, new_state, valid_pos, game_status);
     }
 
     finalize move_to_next (node_id: field, next_node_id: field, new_state: u128, valid_pos: u32, game_status: u8) {
-        // check if is owner
-        assert_eq(self.caller, get_contract_onwer());
-
         // check if is exist
         let is_exist: bool = Mapping::get_or_init(node_exist, node_id, false);
         assert_eq(is_exist, true);
