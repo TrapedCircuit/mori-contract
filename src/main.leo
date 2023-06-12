@@ -110,10 +110,13 @@ program mori.aleo {
         let voted_key1: field = BHP512::hash(self.caller);
         let voted_key2: field = BHP512::hash(node_id);
 
-        return caller_vote then finalize(node_id, mov, voted_key1, voted_key2);
+        let is_valid: bool = mov <= 63u8;
+        assert(is_valid);
+
+        return caller_vote then finalize(node_id, voted_key1, voted_key2);
     }
 
-    finalize vote (node_id: u128, mov: u8, voted_key1: field, voted_key2: field) {
+    finalize vote (node_id: u128, voted_key1: field, voted_key2: field) {
         // check if is exist
         let is_exist: bool = Mapping::get_or_init(node_exist, node_id, false);
         assert_eq(is_exist, true);
@@ -128,11 +131,6 @@ program mori.aleo {
 
         // check is valid
         let node: Node = Mapping::get(nodes, node_id);
-        let is_valid: bool = mov <= 63u8;
-        let square: u128 = node.state.shr(mov * 2u8);
-        let square_mod: u128 = square & 3u128;
-        assert_eq(is_valid, true);
-        assert_eq(square_mod, 0u128);
         assert(node.game_status == 0i8);
         assert(node.node_type == 0u8);
 
