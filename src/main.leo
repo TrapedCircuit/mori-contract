@@ -2,7 +2,7 @@
 program mori.aleo {
     mapping is_voted: Voted => bool;
     mapping nodes: u128 => Node;
-    mapping node_exist: u128 => bool;
+    // mapping node_exist: u128 => bool;
     mapping node_votes: u128 => u32;
 
     record Vote {
@@ -14,8 +14,8 @@ program mori.aleo {
     }
 
     struct Voted {
-        key1: field,
-        key2: field,
+        caller: address,
+        node_id: u128,
     }
 
     struct Node {
@@ -39,13 +39,13 @@ program mori.aleo {
 
     finalize move_to_next (node_id: u128, next_node_id: u128, new_state: u128, new_valid_cnt: u32, game_status: i8) {
         // check if is exist
-        let is_exist: bool = Mapping::get_or_init(node_exist, node_id, false);
+        let is_exist: bool = Mapping::contains(nodes, node_id);
         assert_eq(is_exist, true);
 
         let parent: Node = Mapping::get(nodes, node_id);
 
         // check if is enough votes to move
-        let votes: u32 = Mapping::get_or_init(node_votes, node_id, 0u32);
+        let votes: u32 = Mapping::get_or_use(node_votes, node_id, 0u32);
         let valid_cnt: u32 = parent.valid_cnt / 2u32;
         let is_enough: bool = votes >= valid_cnt;
         assert(is_enough);
@@ -71,7 +71,7 @@ program mori.aleo {
             valid_cnt: new_valid_cnt,
         };
         Mapping::set(nodes, son.node_id, son);
-        Mapping::set(node_exist, son.node_id, true);
+        // Mapping::set(node_exist, son.node_id, true);
     }
 
     transition open_game (start_id: u128) {
@@ -82,7 +82,7 @@ program mori.aleo {
 
     finalize open_game (start_id: u128) {
         // check if is exist
-        let is_exist: bool = Mapping::get_or_init(node_exist, start_id, false);
+        let is_exist: bool = Mapping::contains(nodes, start_id);
         assert_eq(is_exist, false);
 
         let node: Node = Node {
@@ -95,7 +95,7 @@ program mori.aleo {
         };
 
         Mapping::set(nodes, start_id, node);
-        Mapping::set(node_exist, start_id, true);
+        // Mapping::set(node_exist, start_id, true);
     }
 
     // Client Operations
@@ -107,26 +107,23 @@ program mori.aleo {
             node_id: node_id,
             mov: mov,
         };
-        let voted_key1: field = BHP512::hash(self.caller);
-        let voted_key2: field = BHP512::hash(node_id);
+        let voted: Voted = Voted {
+            caller: self.caller,
+            node_id: node_id,
+        };
 
         let is_valid: bool = mov <= 63u8;
         assert(is_valid);
 
-        return caller_vote then finalize(node_id, voted_key1, voted_key2);
+        return caller_vote then finalize(node_id, voted);
     }
 
-    finalize vote (node_id: u128, voted_key1: field, voted_key2: field) {
+    finalize vote (node_id: u128, voted: Voted) {
         // check if is exist
-        let is_exist: bool = Mapping::get_or_init(node_exist, node_id, false);
+        let is_exist: bool = Mapping::contains(nodes, node_id);
         assert_eq(is_exist, true);
 
-        // check if is voted
-        let voted: Voted = Voted {
-            key1: voted_key1,
-            key2: voted_key2,
-        };
-        let is_vote: bool = Mapping::get_or_init(is_voted, voted, false);
+        let is_vote: bool = Mapping::get_or_use(is_voted, voted, false);
         assert_eq(is_vote, false);
 
         // check is valid
@@ -136,7 +133,7 @@ program mori.aleo {
 
 
         Mapping::set(is_voted, voted, true);
-        let votes: u32 = Mapping::get_or_init(node_votes, node_id, 0u32);
+        let votes: u32 = Mapping::get_or_use(node_votes, node_id, 0u32);
         Mapping::set(node_votes, node_id, votes + 1u32);
     }
 }
