@@ -27,6 +27,7 @@ program mori.aleo {
         node_id: u128,
         from: Edge, // parent_id and mov
         state: u128,
+        // ai_mov: u8, TODO: add ai mov
         game_status: i8, // 0 for not end 1 for win -1 for lose 2 for draw
     }
 
@@ -36,6 +37,8 @@ program mori.aleo {
 
     transition ai_move (node_id: u128, next_node_id: u128, new_state: u128, game_status: i8, human_mov: u8) {
         // check if is owner
+
+        // TODO: add human mov and ai move to state
         assert_eq(self.caller, get_contract_onwer());
         return then finalize(node_id, next_node_id, new_state, game_status, human_mov);
     }
@@ -49,8 +52,8 @@ program mori.aleo {
             node_id: node_id,
             mov: human_mov,
         };
-        let mov_votes: u32 = Mapping::get_or_use(edge_votes, edge, 0u32);
-        assert(mov_votes >= 1u32);
+        let votes: u32 = Mapping::get_or_use(edge_votes, edge, 0u32);
+        assert(votes >= 1u32);
 
         // create new node
         let son: Node = Node {
