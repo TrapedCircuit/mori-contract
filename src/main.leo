@@ -1,4 +1,3 @@
-// The 'flipflap' program.
 program mori.aleo {
     mapping is_voted: field => bool;
     mapping nodes: u128 => Node;
@@ -27,7 +26,6 @@ program mori.aleo {
         node_id: u128,
         from: Edge, // parent_id and mov
         state: u128,
-        // ai_mov: u8, TODO: add ai mov
         game_status: i8, // 0 for not end 1 for win -1 for lose 2 for draw
     }
 
@@ -35,10 +33,8 @@ program mori.aleo {
         return aleo1rhgdu77hgyqd3xjj8ucu3jj9r2krwz6mnzyd80gncr5fxcwlh5rsvzp9px; // need to change to your own address
     }
 
-    transition ai_move (node_id: u128, next_node_id: u128, new_state: u128, game_status: i8, human_mov: u8) {
+    transition ai_move (public node_id: u128, public next_node_id: u128, new_state: u128, game_status: i8, human_mov: u8) {
         // check if is owner
-
-        // TODO: add human mov and ai move to state
         assert_eq(self.caller, get_contract_onwer());
         return then finalize(node_id, next_node_id, new_state, game_status, human_mov);
     }
@@ -66,7 +62,7 @@ program mori.aleo {
         Mapping::set(to_nodes, edge, son.node_id);
     }
 
-    transition open_game (start_id: u128) {
+    transition open_game (public start_id: u128) {
         // check if is owner
         assert_eq(self.caller, get_contract_onwer());
         return then finalize(start_id);
